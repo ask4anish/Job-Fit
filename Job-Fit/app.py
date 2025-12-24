@@ -42,6 +42,10 @@ body, .stApp {
 h1, h2, h3, h4, h5, h6, p, div, span, button, input, textarea, label {
     font-family: 'Outfit', sans-serif;
 }
+/* Hide Streamlit default upload help text (200MB) */
+[data-testid="stFileUploader"] div[data-testid="stMarkdownContainer"] {
+    display: none;
+}
 
 /* Fix for Streamlit icons/ligatures rendering as text */
 button[kind="header"] span {
