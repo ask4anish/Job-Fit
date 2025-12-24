@@ -12,6 +12,8 @@ def extract_text_from_pdf(pdf_path):
         print(f"Error extracting text from {pdf_path}: {e}")
         return ""
 
+WHITESPACE_PATTERN = re.compile(r'\s+')
+
 def clean_text(text):
     """
     Cleans the extracted text by removing excessive whitespace and newlines.
@@ -20,7 +22,7 @@ def clean_text(text):
         return ""
     
     # Replace multiple newlines/tabs/spaces with a single space
-    text = re.sub(r'\s+', ' ', text)
+    text = WHITESPACE_PATTERN.sub(' ', text)
     return text.strip()
 
 if __name__ == "__main__":
