@@ -81,15 +81,6 @@ h1, h2, h3 {
     visibility: hidden;
 }
 
-[data-testid="stFileUploader"] small::after {
-    content: "Limit 10MB per file • PDF";
-    visibility: visible;
-    display: block;
-    color: #94a3b8;
-    margin-top: 0.25rem;
-}
-
-
 /* CARDS & CONTAINERS */
 .result-card {
     background: #ffffff;
@@ -224,7 +215,7 @@ uploaded_file = st.file_uploader(
 
 
 if uploaded_file:
-    # Size Validation (10MB) - Note: Server config also enforces this
+    # Size Validation (200MB) 
     if uploaded_file.size > 200 * 1024 * 1024:
         st.error("⚠️ File size exceeds 200MB limit.")
     else:
