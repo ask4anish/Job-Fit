@@ -200,6 +200,7 @@ try:
         st.stop()
 except Exception as e:
     st.exception as e:
+    st.exception(e)
     st.stop()
 
 # ---------------- UI LAYOUT ----------------
