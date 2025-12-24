@@ -1,95 +1,180 @@
 import streamlit as st
 import os
 import tempfile
+import requests
+from streamlit_lottie import st_lottie
 from resume_parser import extract_text_from_pdf, clean_text
 from matcher import ResumeMatcher
 
-PORT = int(os.environ.get("PORT", 8501))
-
-# ---------------- PAGE CONFIG ----------------
+# ---------------- CONFIG & ASSETS ----------------
 st.set_page_config(
-    page_title="Job-Fit | Resume Screening",
+    page_title="Job-Fit",
     layout="centered",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
+    page_icon="📋"
 )
+
+# Lottie Animation Loader
+@st.cache_data
+def load_lottieurl(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# Load Assets
+# Animation of a scanning doc or processing
+lottie_scanning = load_lottieurl("https://lottie.host/3c26cd66-26ba-4478-8720-3301a97d5223/81XyL3jZtJ.json") 
+# Fallback or generic loading
+if not lottie_scanning:
+    lottie_scanning = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_p8bfn5to.json")
 
 # ---------------- CUSTOM CSS ----------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
 
-* {
-    font-family: 'Inter', sans-serif;
+/* GLOBAL STYLES */
+body, .stApp {
+    font-family: 'Outfit', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, p, div, span, button, input, textarea, label {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Fix for Streamlit icons/ligatures rendering as text */
+button[kind="header"] span {
+    font-family: inherit !important;
 }
 
 .stApp {
-    background-color: #ffffff;
-    color: #2c2c2c;
+    background-color: #f8fafc; /* Slate-50 */
+    color: #1e293b; /* Slate-800 */
 }
 
-.title {
+/* HEADINGS */
+h1, h2, h3 {
+    color: #0f172a; /* Slate-900 */
+    font-weight: 700;
+}
+
+.main-title {
     text-align: center;
-    font-size: 2.8rem;
+    font-size: 3rem;
+    background: -webkit-linear-gradient(45deg, #4f46e5, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
     font-weight: 800;
-    color: #ff4b4b;
-    margin-bottom: 5px;
 }
 
 .subtitle {
     text-align: center;
-    font-size: 1.1rem;
-    color: #6b6b6b;
-    margin-bottom: 40px;
+    font-size: 1.2rem;
+    color: #64748b; /* Slate-500 */
+    margin-bottom: 3rem;
 }
 
-.card {
-    background: #f9f9fb;
-    border: 1px solid #e6e6ea;
-    border-radius: 14px;
-    padding: 25px;
-    text-align: center;
-    margin-top: 20px;
+/* CARDS & CONTAINERS */
+.result-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+    border: 1px solid #e2e8f0;
 }
 
-.label {
-    font-size: 0.85rem;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.category {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #222;
-    margin: 10px 0;
-}
-
-.progress {
-    background: #eaeaea;
-    height: 8px;
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 15px 0;
-}
-
-.progress-bar {
-    height: 100%;
-    background: #ff4b4b;
-}
-
-.confidence {
+.category-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #e0e7ff; /* Indigo-100 */
+    color: #4338ca; /* Indigo-700 */
+    border-radius: 9999px;
     font-weight: 600;
-    color: #444;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
 }
 
+.match-score {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #4f46e5; /* Indigo-600 */
+}
+
+/* UPLOADER CUSTOMIZATION */
 [data-testid="stFileUploader"] {
-    border-radius: 12px;
-    padding: 25px;
-    background: #f4f6f9;
-    border: 1px dashed #d0d3d8;
+    background-color: #ffffff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
+[data-testid="stFileUploader"]:hover {
+    border-color: #4f46e5;
+    background-color: #eef2ff;
+}
+
+/* BROWSE BUTTON STYLING */
+[data-testid="stFileUploader"] button {
+    background: -webkit-linear-gradient(45deg, #4f46e5, #06b6d4) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: transform 0.2s;
+}
+
+[data-testid="stFileUploader"] button:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    .main-title {
+        font-size: 2.2rem;
+    }
+    .subtitle {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+    .result-card {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    .match-score {
+        font-size: 2rem;
+    }
+    [data-testid="stFileUploader"] {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-title {
+        font-size: 1.8rem;
+    }
+    .result-card {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+    .match-score {
+        font-size: 1.75rem;
+    }
+    /* Adjust container padding on very small screens */
+    .block-container {
+        padding-top: 2rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* HIDE STREAMLIT BRANDING */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
@@ -107,24 +192,35 @@ except Exception as e:
     st.error(f"Failed to load model: {e}")
     st.stop()
 
-# ---------------- HEADER ----------------
-st.markdown('<div class="title">Job-Fit</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="subtitle">AI-based Resume Screening System</div>',
-    unsafe_allow_html=True
-)
+# ---------------- UI LAYOUT ----------------
 
-# ---------------- FILE UPLOAD ----------------
-uploaded_file = st.file_uploader(
-    "Upload Resume (PDF only)",
-    type=["pdf"]
-)
+# Header
+st.markdown('<div class="main-title">Job-Fit</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Ai resume screening system</div>', unsafe_allow_html=True)
+
+# File Upload Section
+uploaded_file = st.file_uploader("Upload your resume (PDF) • Max 10MB", type=["pdf"])
 
 if uploaded_file:
+    # Size Validation (10MB) - Note: Server config also enforces this
     if uploaded_file.size > 10 * 1024 * 1024:
-        st.error("File size must be under 10MB.")
+        st.error("⚠️ File size exceeds 10MB limit.")
     else:
-        with st.spinner("Analyzing resume..."):
+        # Processing Block
+        with st.container():
+            # Create a placeholder for the loading state
+            loading_placeholder = st.empty()
+            
+            # Show Animation
+            with loading_placeholder.container():
+                col1, col2, col3 = st.columns([1, 2, 1])
+                with col2:
+                    if lottie_scanning:
+                        st_lottie(lottie_scanning, height=250, key="loader")
+                    else:
+                        st.spinner("Analyzing resume content...")
+            
+            # Perform Analysis
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                 tmp.write(uploaded_file.read())
                 tmp_path = tmp.name
@@ -133,24 +229,48 @@ if uploaded_file:
                 raw_text = extract_text_from_pdf(tmp_path)
                 resume_text = clean_text(raw_text)
 
+                # Clear animation once done
+                loading_placeholder.empty()
+
                 if not resume_text:
-                    st.error("Unable to extract text. Scanned PDFs are not supported.")
+                    st.error("❌ Could not extract text. Please ensure it's a text-based PDF.")
                 else:
                     category, confidence = matcher.predict_category(resume_text)
+                    
+                    # ---------------- RESULTS DISPLAY ----------------
+                    st.markdown("""
+                    <div class="result-card">
+                        <div style="text-align: center;">
+                            <span class="category-badge">TOP MATCH</span>
+                            <h2 style="margin: 10px 0; color: #1e293b;">""" + category + """</h2>
+                            <div class="match-score">""" + f"{confidence:.1%}" + """</div>
+                            <p style="color: #64748b;">Confidence Match</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                    st.subheader("Best Matched Category")
-                    st.markdown(f"### {category}")
+                    # Simple Progress Bar
                     st.progress(int(confidence * 100))
-                    st.write(f"**Confidence Score:** {confidence:.1%}")
 
-                    with st.expander("View Extracted Resume Text"):
-                        st.text_area("", resume_text, height=220)
+                    # Expandable details
+                    with st.expander("📄 View Extracted Content"):
+                        st.text_area("Raw Text", resume_text, height=200)
 
+            except Exception as e:
+                loading_placeholder.empty()
+                st.error(f"An error occurred during analysis: {str(e)}")
+            
             finally:
                 if os.path.exists(tmp_path):
                     os.remove(tmp_path)
+
 else:
-    st.info("Upload a PDF resume to begin screening.")
-
-
-    
+    # Empty State Helper
+    st.markdown(
+        """
+        <div style="text-align: center; margin-top: 2rem; color: #94a3b8;">
+            <p>Supported format: <strong>PDF</strong> • Max size: <strong>10MB</strong></p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
