@@ -216,9 +216,10 @@ st.markdown('<div class="subtitle">Ai resume screening system</div>', unsafe_all
 
 # File Upload Section
 uploaded_file = st.file_uploader(
-    "Upload your resume (PDF) • Max 200MB",
+    label="",          
     type=["pdf"]
 )
+
 
 
 
