@@ -15,14 +15,19 @@ class ResumeMatcher:
         
         # Try to load existing model
         self.saved_categories = self.load_model()
-        if self.saved_categories:
-            print(f"Loaded saved model with {len(self.saved_categories)} categories.")
 
+if self.saved_categories is None:
+    self.classifier = None
+    print("No trained model found. classifier=None")
+else:
+    print(f"Loaded saved model with {len(self.saved_categories)} categories.")
+
+    
     def predict_category(self, resume_text):
         """
         Predicts the job category using the trained classifier.
         """
-        if hasattr(self, 'classifier') and self.classifier:
+        if self.classifier is not none:
             try:
                 # Encode text
                 embedding = self.model.encode(resume_text).reshape(1, -1)
@@ -79,6 +84,7 @@ class ResumeMatcher:
             print(f"Error saving model: {e}")
 
     def load_model(self, filename: str = "model.pkl") -> Optional[List[str]]:
+    filename = os.path.join(os.path.dirname(_file_), filename)
         """
         Loads the trained classifier and categories from disk.
         """
