@@ -1,9 +1,14 @@
 import re
-from sentence_transformers import SentenceTransformer, util
+import pickle
+import os
 import numpy as np
+import pandas as pd
+from typing import List, Tuple, Union, Any, Optional
+from sentence_transformers import SentenceTransformer
+from sklearn.linear_model import LogisticRegression
 
 class ResumeMatcher:
-    def __init__(self, transformer_model="all-MiniLM-L6-v2"):
+    def __init__(self, transformer_model: str = "all-MiniLM-L6-v2"):
         print("Loading models... this might take a moment.")
         self.model = SentenceTransformer(transformer_model)
         print("Models loaded successfully.")
@@ -37,11 +42,9 @@ class ResumeMatcher:
         Trains a Logistic Regression classifier on the provided CSV dataset.
         Expected CSV columns: 'Resume', 'Category'
         """
-        import pandas as pd
-        from sklearn.linear_model import LogisticRegression
-        from sklearn.preprocessing import LabelEncoder
-        import pickle
-        
+        if not os.path.exists(csv_path):
+            raise FileNotFoundError(f"Dataset not found at {csv_path}")
+            
         print("Loading dataset...")
         df = pd.read_csv(csv_path)
         
@@ -64,21 +67,21 @@ class ResumeMatcher:
         
         return sorted(df['Category'].unique().tolist())
 
-    def save_model(self, classifier, categories, filename="model.pkl"):
+    def save_model(self, classifier: Any, categories: List[str], filename: str = "model.pkl") -> None:
         """
         Saves the trained classifier and categories to disk.
         """
-        import pickle
-        with open(filename, 'wb') as f:
-            pickle.dump({'classifier': classifier, 'categories': categories}, f)
-        print(f"Model saved to {filename}")
+        try:
+            with open(filename, 'wb') as f:
+                pickle.dump({'classifier': classifier, 'categories': categories}, f)
+            print(f"Model saved to {filename}")
+        except IOError as e:
+            print(f"Error saving model: {e}")
 
-    def load_model(self, filename="model.pkl"):
+    def load_model(self, filename: str = "model.pkl") -> Optional[List[str]]:
         """
         Loads the trained classifier and categories from disk.
         """
-        import pickle
-        import os
         if os.path.exists(filename):
             try:
                 with open(filename, 'rb') as f:
