@@ -208,12 +208,6 @@ except Exception as e:
     st.error(f"Failed to load model: {e}")
     st.stop()
 
-/* Remove "Limit XXMB per file · PDF" text */
-[data-testid="stFileUploader"] div[aria-live="polite"] {
-    display: none !important;
-}
-
-
 # ---------------- UI LAYOUT ----------------
 
 # Header
@@ -231,7 +225,7 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file:
     # Size Validation (10MB) - Note: Server config also enforces this
-    if uploaded_file.size > 10 * 1024 * 1024:
+    if uploaded_file.size > 200 * 1024 * 1024:
         st.error("⚠️ File size exceeds 200MB limit.")
     else:
         # Processing Block
