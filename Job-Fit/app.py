@@ -208,6 +208,12 @@ except Exception as e:
     st.error(f"Failed to load model: {e}")
     st.stop()
 
+/* Remove "Limit XXMB per file · PDF" text */
+[data-testid="stFileUploader"] div[aria-live="polite"] {
+    display: none !important;
+}
+
+
 # ---------------- UI LAYOUT ----------------
 
 # Header
