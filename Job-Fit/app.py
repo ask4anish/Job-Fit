@@ -191,12 +191,15 @@ header {visibility: hidden;}
 # ---------------- MODEL LOADING ----------------
 @st.cache_resource
 def load_matcher():
-    return ResumeMatcher()
+    return ResumeMatcher(model_path="model.pkl")
 
 try:
     matcher = load_matcher()
+    if matcher.model is none:
+        st.error("❌ Model not loaded. model.pkl not found or matcher.py error")
+        st.stop()
 except Exception as e:
-    st.error(f"Failed to load model: {e}")
+    st.exception as e:
     st.stop()
 
 # ---------------- UI LAYOUT ----------------
