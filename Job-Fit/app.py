@@ -42,10 +42,6 @@ body, .stApp {
 h1, h2, h3, h4, h5, h6, p, div, span, button, input, textarea, label {
     font-family: 'Outfit', sans-serif;
 }
-/* Hide Streamlit default upload help text (200MB) */
-[data-testid="stFileUploader"] div[data-testid="stMarkdownContainer"] {
-    display: none;
-}
 
 /* Fix for Streamlit icons/ligatures rendering as text */
 button[kind="header"] span {
@@ -219,22 +215,17 @@ st.markdown('<div class="main-title">Job-Fit</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Ai resume screening system</div>', unsafe_allow_html=True)
 
 # File Upload Section
-st.markdown(
-    """
-    <p style="text-align:center; color:#64748b; margin-bottom:0.5rem;">
-        📄 Upload your resume (PDF) • <strong>Max 10MB</strong>
-    </p>
-    """,
-    unsafe_allow_html=True
+uploaded_file = st.file_uploader(
+    "Upload your resume (PDF) • Max 200MB",
+    type=["pdf"]
 )
 
-uploaded_file = st.file_uploader("", type=["pdf"])
 
 
 if uploaded_file:
     # Size Validation (10MB) - Note: Server config also enforces this
     if uploaded_file.size > 10 * 1024 * 1024:
-        st.error("⚠️ File size exceeds 10MB limit.")
+        st.error("⚠️ File size exceeds 200MB limit.")
     else:
         # Processing Block
         with st.container():
@@ -299,7 +290,7 @@ else:
     st.markdown(
         """
         <div style="text-align: center; margin-top: 2rem; color: #94a3b8;">
-            <p>Supported format: <strong>PDF</strong> • Max size: <strong>10MB</strong></p>
+            <p>Supported format: <strong>PDF</strong> • Max size: <strong>200MB</strong></p>
         </div>
         """,
         unsafe_allow_html=True
