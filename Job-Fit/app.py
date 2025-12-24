@@ -155,6 +155,24 @@ h1, h2, h3 {
     }
 }
 
+/* OVERRIDE FILE UPLOADER LIMIT TEXT */
+/* This is a hack to visually change "Limit 200MB" to "Limit 10MB" 
+   if the server config isn't reflected immediately */
+[data-testid="stFileUploader"] section > input + div {
+    display: none; /* Hide default text if possible, though structure varies */
+}
+
+/* Target the small text element describing the limit */
+[data-testid="stFileUploader"] small {
+    font-size: 0; /* Hide original text */
+}
+
+[data-testid="stFileUploader"] small::after {
+    font-size: 0.875rem; /* Restore font size */
+    content: "Limit 10MB per file • PDF";
+    visibility: visible;
+}
+
 @media (max-width: 480px) {
     .main-title {
         font-size: 1.8rem;
