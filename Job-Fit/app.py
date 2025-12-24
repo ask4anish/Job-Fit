@@ -199,8 +199,7 @@ try:
         st.error("❌ Model not loaded. model.pkl not found or matcher.py error")
         st.stop()
 except Exception as e:
-    st.exception as e:
-    st.exception(e)
+    st.exception(es)
     st.stop()
 
 # ---------------- UI LAYOUT ----------------
