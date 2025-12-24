@@ -76,6 +76,20 @@ h1, h2, h3 {
     margin-bottom: 3rem;
 }
 
+/* Change default Streamlit uploader size text */
+[data-testid="stFileUploader"] small {
+    visibility: hidden;
+}
+
+[data-testid="stFileUploader"] small::after {
+    content: "Limit 10MB per file • PDF";
+    visibility: visible;
+    display: block;
+    color: #94a3b8;
+    margin-top: 0.25rem;
+}
+
+
 /* CARDS & CONTAINERS */
 .result-card {
     background: #ffffff;
