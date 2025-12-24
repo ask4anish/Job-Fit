@@ -219,7 +219,17 @@ st.markdown('<div class="main-title">Job-Fit</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Ai resume screening system</div>', unsafe_allow_html=True)
 
 # File Upload Section
-uploaded_file = st.file_uploader("Upload your resume (PDF) • Max 10MB", type=["pdf"])
+st.markdown(
+    """
+    <p style="text-align:center; color:#64748b; margin-bottom:0.5rem;">
+        📄 Upload your resume (PDF) • <strong>Max 10MB</strong>
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+uploaded_file = st.file_uploader("", type=["pdf"])
+
 
 if uploaded_file:
     # Size Validation (10MB) - Note: Server config also enforces this
