@@ -11,7 +11,7 @@ st.set_page_config(
     page_title="Job-Fit",
     layout="centered",
     initial_sidebar_state="collapsed",
-    page_icon="🚀"
+    page_icon="📋"
 )
 
 # Lottie Animation Loader
@@ -74,11 +74,6 @@ h1, h2, h3 {
     font-size: 1.2rem;
     color: #64748b; /* Slate-500 */
     margin-bottom: 3rem;
-}
-
-/* Change default Streamlit uploader size text */
-[data-testid="stFileUploader"] small {
-    visibility: hidden;
 }
 
 /* CARDS & CONTAINERS */
@@ -191,15 +186,15 @@ header {visibility: hidden;}
 # ---------------- MODEL LOADING ----------------
 @st.cache_resource
 def load_matcher():
-    return ResumeMatcher(model_path="model.pkl")
+    return ResumeMatcher()
 
 try:
     matcher = load_matcher()
-    if matcher.model is none:
-        st.error("❌ Model not loaded. model.pkl not found or matcher.py error")
-        st.stop()
+except FileNotFoundError as e:
+    st.error("⚠️ **Model Missing**: `model.pkl` was not found. Please ensure it is included in your deployment.")
+    st.stop()
 except Exception as e:
-    st.exception(es)
+    st.error(f"⚠️ **Model Load Error**: {e}")
     st.stop()
 
 # ---------------- UI LAYOUT ----------------
@@ -209,18 +204,12 @@ st.markdown('<div class="main-title">Job-Fit</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Ai resume screening system</div>', unsafe_allow_html=True)
 
 # File Upload Section
-uploaded_file = st.file_uploader(
-    label="",          
-    type=["pdf"]
-)
-
-
-
+uploaded_file = st.file_uploader("Upload your resume (PDF) • Max 10MB", type=["pdf"], label_visibility="collapsed")
 
 if uploaded_file:
-    # Size Validation (200MB) 
-    if uploaded_file.size > 200 * 1024 * 1024:
-        st.error("⚠️ File size exceeds 200MB limit.")
+    # Size Validation (10MB) - Note: Server config also enforces this
+    if uploaded_file.size > 10 * 1024 * 1024:
+        st.error("⚠️ File size exceeds 10MB limit.")
     else:
         # Processing Block
         with st.container():
@@ -285,7 +274,7 @@ else:
     st.markdown(
         """
         <div style="text-align: center; margin-top: 2rem; color: #94a3b8;">
-            <p>Supported format: <strong>PDF</strong> • Max size: <strong>200MB</strong></p>
+            <p>Supported format: <strong>PDF</strong> • Max size: <strong>10MB</strong></p>
         </div>
         """,
         unsafe_allow_html=True
