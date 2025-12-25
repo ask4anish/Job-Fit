@@ -1,7 +1,0 @@
-sentence-transformers
-pdfminer.six
-numpy
-scikit-learn
-streamlit
-pandas
-streamlit-lottie
