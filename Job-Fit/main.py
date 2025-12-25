@@ -1,4 +1,3 @@
-
 import argparse
 import os
 from resume_parser import extract_text_from_pdf, clean_text
