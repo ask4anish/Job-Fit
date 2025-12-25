@@ -1,0 +1,8 @@
+streamlit
+streamlit-lottie
+requests
+pdfminer.six
+sentence-transformers
+scikit-learn
+numpy
+pandas
