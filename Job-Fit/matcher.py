@@ -11,23 +11,24 @@ class ResumeMatcher:
     def __init__(self, transformer_model: str = "all-MiniLM-L6-v2"):
         print("Loading models... this might take a moment.")
         self.model = SentenceTransformer(transformer_model)
-        print("Models loaded successfully.")
         
-        # Try to load existing model
-        self.saved_categories = self.load_model()
+        # Try to load existing model - CRITICAL for Cloud Deployment
+        model_path = "model.pkl"
+        if os.path.exists(model_path):
+            self.saved_categories = self.load_model(model_path)
+            if self.saved_categories:
+                print(f"Loaded saved model with {len(self.saved_categories)} categories.")
+            else:
+                raise ValueError("Failed to load model from model.pkl")
+        else:
+            # On Cloud, we cannot train, so we must raise an error if model is missing
+            raise FileNotFoundError("model.pkl not found! Please ensure the pre-trained model is uploaded.")
 
-if self.saved_categories is None:
-    self.classifier = None
-    print("No trained model found. classifier=None")
-else:
-    print(f"Loaded saved model with {len(self.saved_categories)} categories.")
-
-    
     def predict_category(self, resume_text):
         """
         Predicts the job category using the trained classifier.
         """
-        if self.classifier is not none:
+        if hasattr(self, 'classifier') and self.classifier:
             try:
                 # Encode text
                 embedding = self.model.encode(resume_text).reshape(1, -1)
@@ -38,9 +39,9 @@ else:
                 return prediction, round(confidence, 4)
             except Exception as e:
                 print(f"Prediction failed: {e}")
-                return "Unknown", 0.0
+                raise e # Propagate error for visibility
         else:
-            return "Model not trained - Please train using UpdatedResumeDataSet.csv", 0.0
+            raise RuntimeError("Model is not loaded properly.")
 
     def train_model(self, csv_path):
         """
@@ -84,7 +85,6 @@ else:
             print(f"Error saving model: {e}")
 
     def load_model(self, filename: str = "model.pkl") -> Optional[List[str]]:
-    filename = os.path.join(os.path.dirname(_file_), filename)
         """
         Loads the trained classifier and categories from disk.
         """
